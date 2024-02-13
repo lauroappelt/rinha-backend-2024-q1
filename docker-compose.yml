@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+
+    #api1
+    api-01:
+        container_name: rinha-backend-api-01
+        build:
+            context: .
+        volumes:
+            - ./:/opt/www
+        networks:
+            - rinha
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.45'
+                    memory: '0.5GB'
+
+    #api2
+    api-02:
+        container_name: rinha-backend-api-02
+        build:
+            context: .
+        volumes:
+            - ./:/opt/www
+        networks:
+            - rinha
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.45'
+                    memory: '0.5GB'
+    
+    # postgres
+    db:
+        container_name: rinha-backend-db
+        image: postgres:15.4
+        environment:
+            POSTGRES_DB: banco
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_USER: postgres
+        volumes:
+            - pg_data:/var/lib/postgresql/data
+            - ./docker/db.sql:/docker-entrypoint-initdb.d/db.sql
+        networks:
+            - rinha
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.2'
+                    memory: '0.7GB'
+
+  # nginx
+    nginx:
+        container_name: rinha-backend-nginx
+        image: nginx:alpine
+        ports:
+            - "9999:80"
+        volumes:
+            - ./docker/nginx.conf:/etc/nginx/nginx.conf
+        networks:
+            - rinha
+        deploy:
+            resources:
+                limits:
+                    cpus: '0.25'
+                    memory: '0.2GB'
+
+volumes:
+    pg_data:
+        driver: local
+
+networks:
+    rinha:
+        driver: bridge
